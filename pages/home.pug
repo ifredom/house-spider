@@ -1,0 +1,64 @@
+extends ./components/layout
+
+block append scripts
+  script(src="/static/js/lib/echarts.min.js")
+
+block content
+  button.query 获取数据
+  <div id="main" class="content" style="width: 50%;height:600px;"></div>
+
+  script.
+    var btn = document.querySelector('.query');
+    var params = {
+      city: "sjz",
+      area: ""
+    };
+    btn.addEventListener("click", function () {
+      console.log("here")
+      $.ajax({
+          type:'post',
+          url:'/home/query',
+          data:params
+      })
+      .done(function(response){
+          console.log(response)
+          if (response.code == 0){
+            //- document.querySelector('.content').innerHTML = response;
+
+
+            var priceL = []
+            var nameL = []
+            response.data.forEach(function (item, index) {
+              priceL.push(item.price)
+              nameL.push(item.name)
+            })
+
+            // 基于准备好的dom，初始化echarts实例
+            var myChart = echarts.init(document.getElementById('main'));
+
+            // 指定图表的配置项和数据
+            var option = {
+                title: {
+                    text: '热门新房推介'
+                },
+                tooltip: {},
+                legend: {
+                    data:nameL
+                },
+                xAxis: {
+                    data: nameL
+                },
+                yAxis: {},
+                series: [{
+                    name: '销量',
+                    type: 'bar',
+                    data: priceL
+                }]
+            };
+
+            // 使用刚指定的配置项和数据显示图表。
+            myChart.setOption(option);
+          }
+      })
+
+    }, false)
